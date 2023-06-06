@@ -22,9 +22,9 @@ def pregunta_01():
     40
 
     """
-
     return tbl0.shape[0]
 
+# print(pregunta_01())
 
 def pregunta_02():
     """
@@ -35,6 +35,8 @@ def pregunta_02():
 
     """
     return tbl0.shape[1]
+
+# print(pregunta_02())
 
 
 def pregunta_03():
@@ -51,7 +53,10 @@ def pregunta_03():
     Name: _c1, dtype: int64
 
     """
-    return tbl0._c1.value_counts().sort_index(ascending=True)
+    
+    return (tbl0["_c1"].value_counts()).sort_index()
+    
+# print(pregunta_03())
 
 
 def pregunta_04():
@@ -66,9 +71,12 @@ def pregunta_04():
     E    4.785714
     Name: _c2, dtype: float64
     """
+    tab0 = tbl0[["_c1","_c2"]]
+    tab4 = tab0.groupby("_c1").mean()
 
-    return tbl0.groupby("_c1")["_c2"].mean()
+    return tab4.squeeze()
 
+# print(pregunta_04())
 
 def pregunta_05():
     """
@@ -84,8 +92,11 @@ def pregunta_05():
     E    9
     Name: _c2, dtype: int64
     """
-    return tbl0.groupby("_c1")["_c2"].max()
-
+    tab0 = tbl0[["_c1","_c2"]]
+    tab5 = tab0.groupby("_c1").max()
+    return tab5.squeeze()
+ 
+# print(pregunta_05())
 
 def pregunta_06():
     """
@@ -96,10 +107,15 @@ def pregunta_06():
     ['A', 'B', 'C', 'D', 'E', 'F', 'G']
 
     """
-    lista = list(tbl1._c4.unique())
-    lista = [i.upper() for i in lista]
-
-    return sorted(lista)
+    tab1 = tbl1[["_c4"]]
+    tab6 = tab1["_c4"].unique()
+    tab6.sort()
+    tab6.tolist()
+    tab6Upper = [x.upper() for x in tab6]
+    
+    return tab6Upper
+    
+# print(pregunta_06())
 
 
 def pregunta_07():
@@ -114,9 +130,13 @@ def pregunta_07():
     D    23
     E    67
     Name: _c2, dtype: int64
-    """ 
-    return tbl0.groupby("_c1")["_c2"].sum()
+    """
 
+    tab0 = tbl0[["_c1","_c2"]]
+    tab7 = tab0.groupby("_c1").sum()
+    return tab7.squeeze()
+
+# print(pregunta_07())
 
 def pregunta_08():
     """
@@ -133,10 +153,12 @@ def pregunta_08():
     39   39   E    5  1998-01-26    44
 
     """
-    tbl0['suma'] = tbl0['_c0'] + tbl0['_c2']
+    tbl08 = tbl0
+    tbl08["suma"] = tbl08["_c0"] + tbl08["_c2"]
+ 
+    return tbl08
 
-    return tbl0
-
+# print(pregunta_08())
 
 def pregunta_09():
     """
@@ -153,16 +175,17 @@ def pregunta_09():
     39   39   E    5  1998-01-26  1998
 
     """
+    tbl09 = tbl0
+    tbl09["year"] = tbl09["_c3"].str.split("-").str[0]
 
-    tbl0['year'] = tbl0['_c3'].apply(lambda x: x[:4])
+    return tbl09
 
-    return tbl0
-
+# print(pregunta_09())
 
 def pregunta_10():
     """
     Construya una tabla que contenga _c1 y una lista separada por ':' de los valores de
-    la columna _c2 para el archivo ` .tsv`.
+    la columna _c2 para el archivo `tbl0.tsv`.
 
     Rta/
                                    _c1
@@ -173,21 +196,14 @@ def pregunta_10():
     3   D                  1:2:3:5:5:7
     4   E  1:1:2:3:3:4:5:5:5:6:7:8:8:9
     """
+    tab10 = tbl0[["_c1","_c2"]]
+    tab10 = tab10.groupby("_c1")["_c2"].apply(lambda x: ":".join(map(str, x))).to_frame()
+    list10 = tab10["_c2"].apply(lambda x: ":".join(sorted(x.split(":"))))
+    tab10["_c2"] = list10
 
-    def mostrar(a):
-        a = a.tolist()
-        a.sort()
-        str1=""
-        for el in a:
-            str1 += ":"+ str(el)
-        return str1[1:]
-        
-    df = tbl0
-    df._c0 = df._c1
-    df1 = pd.pivot_table(tbl0, index='_c0', values=['_c2'], aggfunc=mostrar)
+    return tab10
 
-    return df1
-
+# print(pregunta_10())
 
 
 def pregunta_11():
@@ -206,16 +222,14 @@ def pregunta_11():
     38   38      d,e
     39   39    a,d,f
     """
-    def mostrar(lista):
-        str1 = ""
-        for el in lista:
-            str1 += ","+el
-        return str1[1:]
+    tab11 = tbl1[["_c0","_c4"]]
+    tab11 = tab11.groupby("_c0")["_c4"].apply(lambda x: ",".join(map(str, x))).to_frame()
+    list4 = tab11["_c4"].apply(lambda x: ",".join(sorted(x.split(","))))
+    tab11["_c4"] = list4
 
-    df = tbl1.groupby('_c0').agg({'_c4': lambda x: sorted(list(x))})
-    df._c4 = df['_c4'].apply(mostrar)
-    df = df.reset_index()
-    return df
+    return tab11.reset_index()
+
+# print(pregunta_11())
 
 
 def pregunta_12():
@@ -233,17 +247,14 @@ def pregunta_12():
     38   38                    eee:0,fff:9,iii:2
     39   39                    ggg:3,hhh:8,jjj:5
     """
-    def mostrar(lista):
-        str1 = ""
-        for el in lista:
-            str1 += ","+el
-        return str1[1:]
-    tbl2['_c5'] = tbl2['_c5a'] + ':' + tbl2['_c5b'].astype(str)
-    df = tbl2.groupby('_c0').agg({'_c5': lambda x: sorted(list(x))})
-    df._c5 = df['_c5'].apply(mostrar)
-    df = df.reset_index()
-    return df
+    tab12 = tbl2[["_c0","_c5a","_c5b"]]
+    tab12["_c5"] = tab12[["_c5a","_c5b"]].apply(lambda x: ":".join(map(str, x)), axis=1)
+    tab12 = tab12.groupby("_c0")["_c5"].apply(lambda x: ",".join(map(str, x))).to_frame()
+    tab12["_c5"] = tab12["_c5"].apply(lambda x: ",".join(sorted(x.split(","))))
 
+    return tab12.reset_index()
+
+# print(pregunta_12())
 
 def pregunta_13():
     """
@@ -259,5 +270,8 @@ def pregunta_13():
     E    275
     Name: _c5b, dtype: int64
     """
-    df= pd.merge(tbl0, tbl2, how="outer")
-    return df.groupby('_c1')['_c5b'].sum()
+    tab13 = pd.merge(tbl0, tbl2, on="_c0").groupby("_c1")["_c5b"].sum()
+
+    return tab13
+
+# print(pregunta_13())
